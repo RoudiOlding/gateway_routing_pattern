@@ -1,69 +1,37 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gateway-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location ~* ^/api/products(.*)$ {
-        set $version "v1";
-        if ($http_x_api_version = "v2") {
-          set $version "v2";
-        }
-        proxy_pass http://product-service-$version.default.svc.cluster.local$1;
-      }
+  name: api-gateway
 spec:
   ingressClassName: nginx
   rules:
-  - host: localhost
-    http:
+  - http:
       paths:
-      - path: /api/users(/|$)(.*)
+      - path: /api/products
+        pathType: Prefix
+        backend:
+          service:
+            name: product-service
+            port:
+              number: 80
+      - path: /api/users
         pathType: Prefix
         backend:
           service:
             name: user-service
             port:
               number: 80
-      - path: /api/orders(/|$)(.*)
+      - path: /api/orders
         pathType: Prefix
         backend:
           service:
             name: order-service
             port:
               number: 80
-      - path: /api/notifications(/|$)(.*)
+      - path: /api/notifications
         pathType: Prefix
         backend:
           service:
             name: notification-service
-            port:
-              number: 80
-      - path: /api/products(/|$)(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: product-service-v1
-            port:
-              number: 80
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: product-v2-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-spec:
-  ingressClassName: nginx
-  rules:
-  - host: localhost
-    http:
-      paths:
-      - path: /api/v2/products(/|$)(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: product-service-v2
             port:
               number: 80

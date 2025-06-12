@@ -1,43 +1,52 @@
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3001;
+const port = 3000;
 
 app.use(express.json());
 
 const productsV1 = [
-    { id: 1, name: 'Laptop', price: 999.99 },
-    { id: 2, name: 'Phone', price: 599.99 },
-    { id: 3, name: 'Tablet', price: 399.99 }
+    { id: 1, name: "Laptop", price: 999 },
+    { id: 2, name: "Phone", price: 599 },
+    { id: 3, name: "Tablet", price: 399 }
 ];
 
 const productsV2 = [
-    { id: 1, name: 'Laptop', price: 999.99, description: 'High-performance laptop', category: 'Electronics', stock: 15 },
-    { id: 2, name: 'Phone', price: 599.99, description: 'Latest smartphone', category: 'Electronics', stock: 25 },
-    { id: 3, name: 'Tablet', price: 399.99, description: 'Portable tablet device', category: 'Electronics', stock: 10 }
+    { id: 1, name: "Laptop", price: 999, description: "High-performance laptop", category: "Electronics", stock: 50 },
+    { id: 2, name: "Phone", price: 599, description: "Latest smartphone", category: "Electronics", stock: 100 },
+    { id: 3, name: "Tablet", price: 399, description: "Portable tablet", category: "Electronics", stock: 75 }
 ];
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'healthy', service: 'product-service', version: process.env.VERSION || 'v1' });
+    res.json({ status: 'OK', service: 'product-service' });
 });
 
 app.get('/api/products', (req, res) => {
-    const version = req.headers['x-api-version'] || process.env.VERSION || 'v1';
-    const products = version === 'v2' ? productsV2 : productsV1;
-    res.json({ products, version, instance: process.env.HOSTNAME || 'local' });
+    const version = req.headers['x-version'] || 'v1';
+    if (version === 'v2') {
+        res.json(productsV2);
+    } else {
+        res.json(productsV1);
+    }
 });
 
 app.get('/api/products/:id', (req, res) => {
-    const version = req.headers['x-api-version'] || process.env.VERSION || 'v1';
-    const products = version === 'v2' ? productsV2 : productsV1;
-    const product = products.find(p => p.id === parseInt(req.params.id));
+    const id = parseInt(req.params.id);
+    const version = req.headers['x-version'] || 'v1';
     
-    if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
+    let product;
+    if (version === 'v2') {
+        product = productsV2.find(p => p.id === id);
+    } else {
+        product = productsV1.find(p => p.id === id);
     }
     
-    res.json({ product, version, instance: process.env.HOSTNAME || 'local' });
+    if (product) {
+        res.json(product);
+    } else {
+        res.status(404).json({ error: 'Product not found' });
+    }
 });
 
-app.listen(PORT, () => {
-    console.log(`Product Service running on port ${PORT}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Product service running on port ${port}`);
 });

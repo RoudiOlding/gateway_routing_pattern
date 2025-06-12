@@ -8,8 +8,7 @@ docker build -t notification-service ./services/notification-service
 kubectl apply -f k8s/
 
 # Esperar por los deployments
-kubectl rollout status deployment/product-service-v1
-kubectl rollout status deployment/product-service-v2
+kubectl rollout status deployment/product-service
 kubectl rollout status deployment/user-service
 kubectl rollout status deployment/order-service
 kubectl rollout status deployment/notification-service
@@ -21,9 +20,8 @@ curl http://localhost/api/orders
 curl http://localhost/api/notifications
 
 # Prueba de versiones de rutas (Product Service)
-curl http://localhost/api/products -H "x-api-version: v1"
-curl http://localhost/api/products -H "x-api-version: v2"
-curl http://localhost/api/v2/products
+curl http://localhost/api/products -H "x-version: v1"
+curl http://localhost/api/products -H "x-version: v2"
 
 # Prueba de Load Balancing (Multiples consultas)
 for i in {1..5}; do
@@ -32,14 +30,22 @@ for i in {1..5}; do
   sleep 1
 done
 
+# Prueba de Load Balancing para Order Service
+for i in {1..5}; do
+  echo "Order Request $i:"
+  curl http://localhost/api/orders | grep instance
+  sleep 1
+done
+
 # Prueba de Alta Disponibilidad - Eliminar un user service pod
 kubectl get pods -l app=user-service
-kubectl delete pod [POD_NAME]
+echo "Elimina uno de los pods mostrados arriba usando:"
+echo "kubectl delete pod [POD_NAME]"
 
 # Seguir probando mientras el pod fue eliminado
 for i in {1..3}; do
   echo "Request during failover $i:"
-  curl http://localhost/api/users | grep instance
+  curl http://localhost/api/users
   sleep 2
 done
 
@@ -52,15 +58,23 @@ kubectl get svc
 # Visualizar ingress
 kubectl get ingress
 
-# Verificar log de los pods
-kubectl logs -l app=product-service
-kubectl logs -l app=user-service
-kubectl logs -l app=order-service
-kubectl logs -l app=notification-service
+# Verificar logs de los pods
+kubectl logs -l app=product-service --tail=5
+kubectl logs -l app=user-service --tail=5
+kubectl logs -l app=order-service --tail=5
+kubectl logs -l app=notification-service --tail=5
 
-# Escalar servicios
+# Escalar servicios para demostrar elasticidad
 kubectl scale deployment user-service --replicas=5
+kubectl get pods -l app=user-service
+
+# Volver a escalar
+kubectl scale deployment user-service --replicas=3
 kubectl scale deployment order-service --replicas=3
 
-# Limpieza
+# Prueba de disponibilidad después del escalado
+curl http://localhost/api/users
+curl http://localhost/api/orders
+
+# Limpieza completa
 kubectl delete -f k8s/
