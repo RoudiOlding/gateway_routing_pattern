@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  product-service-v1:
+    build: ./services/product-service
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+      - VERSION=v1
+      - HOSTNAME=product-v1
+
+  product-service-v2:
+    build: ./services/product-service
+    ports:
+      - "3011:3000"
+    environment:
+      - PORT=3000
+      - VERSION=v2
+      - HOSTNAME=product-v2
+
+  user-service-1:
+    build: ./services/user-service
+    ports:
+      - "3002:3000"
+    environment:
+      - PORT=3000
+      - HOSTNAME=user-service-1
+
+  user-service-2:
+    build: ./services/user-service
+    ports:
+      - "3012:3000"
+    environment:
+      - PORT=3000
+      - HOSTNAME=user-service-2
+
+  order-service-1:
+    build: ./services/order-service
+    ports:
+      - "3003:3000"
+    environment:
+      - PORT=3000
+      - HOSTNAME=order-service-1
+
+  order-service-2:
+    build: ./services/order-service
+    ports:
+      - "3013:3000"
+    environment:
+      - PORT=3000
+      - HOSTNAME=order-service-2
+
+  notification-service:
+    build: ./services/notification-service
+    ports:
+      - "3004:3000"
+    environment:
+      - PORT=3000
+      - HOSTNAME=notification-service
