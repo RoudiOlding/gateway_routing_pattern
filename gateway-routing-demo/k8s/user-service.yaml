@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-service
-  labels:
-    app: user-service
 spec:
   replicas: 3
   selector:
@@ -17,13 +15,9 @@ spec:
       containers:
       - name: user-service
         image: user-service:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 3000
-        env:
-        - name: PORT
-          value: "3000"
-        imagePullPolicy: Never
-
 ---
 apiVersion: v1
 kind: Service

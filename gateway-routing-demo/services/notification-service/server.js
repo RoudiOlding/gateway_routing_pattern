@@ -1,48 +1,35 @@
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3004;
+const port = 3000;
 
 app.use(express.json());
 
 const notifications = [
-    { id: 1, userId: 1, type: 'email', message: 'Order shipped', sent: true },
-    { id: 2, userId: 2, type: 'sms', message: 'Payment confirmed', sent: true },
-    { id: 3, userId: 1, type: 'email', message: 'Order delivered', sent: false }
+    { id: 1, type: "email", recipient: "john@example.com", message: "Order confirmed", sent: true },
+    { id: 2, type: "sms", recipient: "+1234567890", message: "Order shipped", sent: true },
+    { id: 3, type: "email", recipient: "jane@example.com", message: "Order pending", sent: false }
 ];
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'healthy', service: 'notification-service', instance: process.env.HOSTNAME || 'local' });
+    res.json({ status: 'OK', service: 'notification-service' });
 });
 
 app.get('/api/notifications', (req, res) => {
-    res.json({ 
-        notifications, 
-        instance: process.env.HOSTNAME || 'local',
-        timestamp: new Date().toISOString()
-    });
+    res.json(notifications);
 });
 
 app.post('/api/notifications', (req, res) => {
     const newNotification = {
         id: notifications.length + 1,
-        userId: req.body.userId,
-        type: req.body.type || 'email',
+        type: req.body.type || "email",
+        recipient: req.body.recipient,
         message: req.body.message,
-        sent: false
+        sent: true
     };
-    
     notifications.push(newNotification);
-    
-    setTimeout(() => {
-        newNotification.sent = true;
-    }, 1000);
-    
-    res.status(201).json({ 
-        notification: newNotification, 
-        instance: process.env.HOSTNAME || 'local' 
-    });
+    res.status(201).json(newNotification);
 });
 
-app.listen(PORT, () => {
-    console.log(`Notification Service running on port ${PORT}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Notification service running on port ${port}`);
 });
