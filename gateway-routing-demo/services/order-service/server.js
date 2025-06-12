@@ -15,7 +15,10 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/orders', (req, res) => {
-    res.json(orders);
+    res.json({
+        instance: process.env.HOSTNAME || 'unknown',
+        orders: orders
+    });
 });
 
 app.get('/api/orders/:id', (req, res) => {
