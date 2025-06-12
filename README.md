@@ -57,14 +57,14 @@ kubectl delete pod [user-service-pod-name]
 curl http://localhost/api/users  # Sigue funcionando
 ```
 
-## Services
+## Servicios
 
 - **Product Service** (Port 3001): Maneja el catálogo de productos en base a las versiones v1/v2
 - **User Service** (Port 3002): User management con 3 instancias
 - **Order Service** (Port 3003): Order processing con 2 instancias  
 - **Notification Service** (Port 3004): Manejo de notificaciones
 
-## Key Files
+## Archivos Clave
 
 - `services/*/server.js`: Implementación de los servicios
 - `k8s/*.yaml`: Despliegue de Kubernetes y sus servicios
